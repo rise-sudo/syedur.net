@@ -1,6 +1,8 @@
 <script>
     import blogs from '../blogs.json'
 
+    export let data;
+
     const individualBlogs = {};
 
     blogs.forEach(blog => {
@@ -9,8 +11,6 @@
 
         individualBlogs[name] = html;
     });
-
-    export let data;
 
     if(data.name in individualBlogs){
         data.content = true;
@@ -33,3 +33,4 @@
 {:else}
     <p>Invalid URL for blog post.</p>
 {/if}
+<a href='/blog'>Go Back</a>
