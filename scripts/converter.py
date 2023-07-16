@@ -14,7 +14,7 @@ def dump_blogs(blogs):
     """ dump blogs
     dump the blogs data in src/data """
 
-    filename = '../src/data/blogs.json'
+    filename = '../src/routes/blog/blogs.json'
 
     with open(filename, 'w') as fn:
         json.dump(blogs, fn, sort_keys=True, indent=4)
