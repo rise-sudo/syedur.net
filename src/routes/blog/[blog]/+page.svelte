@@ -30,9 +30,15 @@
         {#if data.content}
             {#each data.html as blogLine}
                 {#if blogLine.html_tag == 'h1'}
-                    <h1 class="text-3xl font-bold text-slate-400 mt-4 pb-2">{blogLine.content}</h1>
+                    <h1 class="text-3xl font-bold text-slate-400 mt-4 pb-2">{blogLine.content[0]}</h1>
+                {:else if blogLine.html_tag == 'h2'}
+                    <h2 class="text-2xl font-bold text-slate-400 mt-4 pb-2">{blogLine.content[0]}</h2>
+                {:else if blogLine.html_tag == 'h3'}
+                    <h3 class="text-xl font-bold text-slate-400 mt-4 pb-2">{blogLine.content[0]}</h3>
+                {:else if blogLine.html_tag == 'img'}
+                    <img class="bg-white mt-4 pb-2" src={blogLine.content[1]} alt={blogLine.content[0]}>
                 {:else if blogLine.html_tag == 'p'}
-                    <p class="text-slate-300 pb-2">{blogLine.content}</p>
+                    <p class="text-slate-300 pb-2">{blogLine.content[0]}</p>
                 {/if}
             {/each}
         {:else}
