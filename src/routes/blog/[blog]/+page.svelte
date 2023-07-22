@@ -6,15 +6,11 @@
     const individualBlogs = {};
 
     blogs.forEach(blog => {
-        const name = blog.name;
-        const html = blog.html;
-
-        individualBlogs[name] = html;
+        individualBlogs[blog.name] = blog.data;
     });
 
     if(data.name in individualBlogs){
         data.content = true;
-        data.html = individualBlogs[data.name];
     }
     else{
         data.content = false;
@@ -28,28 +24,17 @@
     <div class="grow"></div>
     <div class="flex-none w-1/2">
         {#if data.content}
-            {#each data.html as blogLine}
-                {#if blogLine.html_tag == 'h1'}
-                    <h1 class="text-3xl font-bold text-slate-400 mt-4 pb-2">{blogLine.line[0].content}</h1>
-                {:else if blogLine.html_tag == 'h2'}
-                    <h2 class="text-2xl font-bold text-slate-400 mt-4 pb-2">{blogLine.line[0].content}</h2>
-                {:else if blogLine.html_tag == 'h3'}
-                    <h3 class="text-xl font-bold text-slate-400 mt-4 pb-2">{blogLine.line[0].content}</h3>
-                {:else if blogLine.html_tag == 'img'}
-                    <img class="bg-white mt-4 pb-2" src={blogLine.line[1].content} alt={blogLine.line[0].content}>
-                {:else if blogLine.html_tag == 'p'}
-                    <p class="text-slate-300 pb-2">
-                        {#each blogLine.line as lineComponent}
-                            {#if lineComponent.special_format == 'b'}
-                                <b>{lineComponent.content}</b>
-                            {:else if lineComponent.special_format == 'i'}
-                                <i>{lineComponent.content}</i>
-                            {:else}
-                                {lineComponent.content}
-                            {/if}
-                            &nbsp;
-                        {/each}
-                    </p>
+            {#each individualBlogs[data.name] as html}
+                {#if html.type == 'h1'}
+                    <div class="text-3xl font-bold text-slate-400 mt-4 pb-2">{@html html.content}</div>
+                {:else if html.type == 'h2'}
+                    <div class="text-2xl font-bold text-slate-400 mt-4 pb-2">{@html html.content}</div>
+                {:else if html.type == 'h3'}
+                    <div class="text-xl font-bold text-slate-400 mt-4 pb-2">{@html html.content}</div>
+                {:else if html.type == 'img'}
+                    <div class="bg-white mt-4 pb-2">{@html html.content}</div>
+                {:else}
+                    <div class="text-slate-300 pb-2">{@html html.content}</div>
                 {/if}
             {/each}
         {:else}
