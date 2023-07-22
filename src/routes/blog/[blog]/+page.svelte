@@ -30,15 +30,26 @@
         {#if data.content}
             {#each data.html as blogLine}
                 {#if blogLine.html_tag == 'h1'}
-                    <h1 class="text-3xl font-bold text-slate-400 mt-4 pb-2">{blogLine.content[0]}</h1>
+                    <h1 class="text-3xl font-bold text-slate-400 mt-4 pb-2">{blogLine.line[0].content}</h1>
                 {:else if blogLine.html_tag == 'h2'}
-                    <h2 class="text-2xl font-bold text-slate-400 mt-4 pb-2">{blogLine.content[0]}</h2>
+                    <h2 class="text-2xl font-bold text-slate-400 mt-4 pb-2">{blogLine.line[0].content}</h2>
                 {:else if blogLine.html_tag == 'h3'}
-                    <h3 class="text-xl font-bold text-slate-400 mt-4 pb-2">{blogLine.content[0]}</h3>
+                    <h3 class="text-xl font-bold text-slate-400 mt-4 pb-2">{blogLine.line[0].content}</h3>
                 {:else if blogLine.html_tag == 'img'}
-                    <img class="bg-white mt-4 pb-2" src={blogLine.content[1]} alt={blogLine.content[0]}>
+                    <img class="bg-white mt-4 pb-2" src={blogLine.line[1].content} alt={blogLine.line[0].content}>
                 {:else if blogLine.html_tag == 'p'}
-                    <p class="text-slate-300 pb-2">{blogLine.content[0]}</p>
+                    <p class="text-slate-300 pb-2">
+                        {#each blogLine.line as lineComponent}
+                            {#if lineComponent.special_format == 'b'}
+                                <b>{lineComponent.content}</b>
+                            {:else if lineComponent.special_format == 'i'}
+                                <i>{lineComponent.content}</i>
+                            {:else}
+                                {lineComponent.content}
+                            {/if}
+                            &nbsp;
+                        {/each}
+                    </p>
                 {/if}
             {/each}
         {:else}

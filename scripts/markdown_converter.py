@@ -6,10 +6,25 @@ def define_markdown_to_html():
     if applicable otherwise a key term is used instead """
 
     markdown_to_html = {
-        "#": "h1",
-        "##": "h2",
-        "###": "h3",
-        "![+]+(+)": "img",
+        "simple": {
+            "#": "h1",
+            "##": "h2",
+            "###": "h3",
+
+        },
+        "inline": {
+            "b": {
+                "start": "**",
+                "end": "**"
+            },
+            "i": {
+                "start": "_",
+                "end": "_",
+            }
+        },
+        "block": {
+            "![+]+(+)": "img",
+        }
     }
 
     return markdown_to_html
@@ -25,7 +40,7 @@ def dump_blogs(blogs):
 
 def markdown_converter():
     """ markdown converter
-    coverts md files to json """
+    converts md files into a datastructure """
 
     blogs = []
 
@@ -47,45 +62,119 @@ def markdown_converter():
 
         with open(file, 'r') as fn:
             
-            for line in fn.readlines():                    
-                if not line.strip():
+            for markdown_line in fn.readlines():
+                if not markdown_line.strip():
                     continue
 
-                content = []
+                simple_markdown = False
                 html_tag = ''
+                special_format = ''
+                line = []
+                block_markdown_history = []
+                block_content = ''
+                completed_block = ''
+                maybe_image = False
+                uncategorized_block_content = ''
+                start_of_block = True
 
-                for markdown in markdown_to_html.keys():
+                for index, word in enumerate(markdown_line.split()):
+                    categorized = False
 
-                    if line.split()[0] == markdown:
-                        content = [' '.join(line.split()[1:])]
-                        html_tag = markdown_to_html[markdown]
+                    if index == 0:
+                        for markdown in markdown_to_html['simple'].keys():
 
-                        break
+                            if word == markdown:
+                                line_component = {
+                                    'content': ' '.join(markdown_line.split()[1:]),
+                                }
+                                
+                                line = [line_component]
 
-                    elif '+' in markdown:
+                                html_tag = markdown_to_html['simple'][markdown]
+
+                                simple_markdown = True
+
+                                break
+
+                        if simple_markdown:
+                            break
+
+                    for markdown, location in markdown_to_html['inline'].items():
+
+                        markdown_start = location['start']
+                        markdown_end = location['end']
+
+                        if word.startswith(markdown_start) and start_of_block:
+                            if word.endswith(markdown_end):
+                                completed_block = f'{word[len(markdown_start):len(word)-len(markdown_end)]}'
+                                special_format = markdown
+                                categorized = True
+                                break
+
+                            word = word[len(markdown_start):]
+                            block_markdown_history.append(markdown)
+                            start_of_block = False
+                        
+                        if word.endswith(markdown_end) and markdown == block_markdown_history[-1]:
+                            completed_block = block_content + f' {word[:len(word)-len(markdown_end)]}'
+                            special_format = block_markdown_history[-1]
+                            start_of_block = True
+                            block_content = ''
+                            categorized = True
+                        elif not start_of_block:
+                            if markdown == block_markdown_history[-1]:
+                                block_content += f' {word}'
+                                categorized = True
+
+                    for markdown in markdown_to_html['block']:
                         markdown_components = markdown.split('+')
-                        block_content = ''
-                        start_of_block = True
+                        teststart_of_block = True
 
                         for markdown_component in markdown_components:
-                            if markdown_component in line and start_of_block:
-                                block_content = line.split(markdown_component, 1)[-1]
-                                start_of_block = False
-                            elif markdown_component in line:
-                                block_content = block_content.split(markdown_component, 1)[0]
-                                start_of_block = True
-                                content.append(block_content)
+                            if markdown_component in word and teststart_of_block:
+                                teststart_of_block = False
+                            elif markdown_component in word:
+                                maybe_image = True
+                                teststart_of_block = True
 
-                        if len(content) > 0:
-                            html_tag = markdown_to_html[markdown]
+                        if maybe_image:
+                            html_tag = markdown_to_html['block'][markdown]
+
+
+                    if not categorized:
+                        uncategorized_block_content += f' {word}'
+                    elif uncategorized_block_content:
+                        line.append({
+                            'content': uncategorized_block_content.lstrip(),
+                        })
+                        uncategorized_block_content = ''
+                    if completed_block:
+                        line.append({
+                            'content': completed_block.lstrip(),
+                            'special_format': special_format,
+                        })
+                        completed_block = ''
 
                 html_tag = html_tag if html_tag else 'p'
-                content = content if len(content) > 0 else [line.strip()]
-                blog_data['html'].append({'html_tag': html_tag, 'content': content})
 
-        blogs.append(blog_data)
+                if html_tag == 'img':
+                    line.append({
+                        'content': markdown_line[2:].split(']')[0]
+                    })
+                    line.append({
+                        'content': markdown_line.split('(')[-1][:-1]
+                    })
+
+                line = line if len(line) > 0 else [{'content': markdown_line.strip()}]
+
+
+
+                blog_data['html'].append({'html_tag': html_tag, 'line': line})
+
+            blogs.append(blog_data)
 
     dump_blogs(blogs)
+
 
 if __name__ == '__main__':
     markdown_converter()
