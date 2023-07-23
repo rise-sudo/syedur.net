@@ -33,6 +33,12 @@
                     <div class="text-xl font-bold text-slate-400 mt-4 pb-2">{@html html.content}</div>
                 {:else if html.type == 'img'}
                     <div class="bg-white mt-4 pb-2">{@html html.content}</div>
+                {:else if html.type == 'li'}
+                    <ul class="text-sky-500 pl-4 list-disc">
+                        {#each html.content as listItem}
+                            {@html listItem}
+                        {/each}
+                    </ul>
                 {:else}
                     <div class="text-slate-300 pb-2">{@html html.content}</div>
                 {/if}
