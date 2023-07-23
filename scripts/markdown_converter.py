@@ -13,6 +13,7 @@ def define_markdown_to_html():
 
         },
         "list": "-",
+        "code": "```",
         "inline": {
             "**": "b",
             "_": "i"
@@ -52,7 +53,8 @@ def markdown_converter():
 
         with open(located_blog_file, 'r') as fn:
             lines = fn.readlines()
-            list_items = []
+            line_items = []
+            code_block = False
             
             for index, line in enumerate(lines):
                 simple_markdown = False
@@ -98,7 +100,7 @@ def markdown_converter():
                 if html_line.startswith(f"{markdown_to_html['list']} "):
                     html_tag = 'li'
                     html_line = f'<{html_tag}>{html_line[1:].strip()}</{html_tag}>'
-                    list_items.append(html_line)
+                    line_items.append(html_line)
 
                     if index < len(lines)-1:
                         next_line = lines[index+1]
@@ -106,13 +108,29 @@ def markdown_converter():
                         if next_line.startswith(f"{markdown_to_html['list']} "):
                             pass
                         else:
-                            blog_data['data'].append({'type': html_tag, 'content': list_items})
-                            list_items = []
+                            blog_data['data'].append({'type': html_tag, 'content': line_items})
+                            line_items = []
 
                     else:
-                        blog_data['data'].append({'type': html_tag, 'content': list_items})
-                        list_items = []
+                        blog_data['data'].append({'type': html_tag, 'content': line_items})
+                        line_items = []
 
+                    continue
+
+
+                if html_line.strip() == markdown_to_html['code']:
+                    if code_block:
+                        code_block = False
+                        blog_data['data'].append({'type': 'code', 'content': line_items})
+                        line_items = []
+                    else:
+                        code_block = True
+
+                    continue
+
+                if code_block:
+                    html_line = f'<p>{html_line.strip()}</p>'
+                    line_items.append(html_line)
                     continue
 
                 blog_data['data'].append({'type': 'p', 'content': f'<p>{html_line.strip()}</p>'})

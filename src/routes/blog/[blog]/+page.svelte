@@ -39,6 +39,12 @@
                             {@html listItem}
                         {/each}
                     </ul>
+                {:else if html.type == 'code'}
+                    <div class="text-emerald-300 my-4 py-2 px-2 font-mono bg-slate-900 border border-dashed border-emerald-600">
+                        {#each html.content as codeItem}
+                            {@html codeItem}
+                        {/each}
+                    </div>
                 {:else}
                     <div class="text-slate-300 pb-2">{@html html.content}</div>
                 {/if}
