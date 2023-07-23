@@ -18,4 +18,10 @@ print('just another line of code')
 
 ![This is an example image of the github logo.](https://github.githubassets.com/images/modules/logos_page/GitHub-Logo.png)
 
+```
+print('just another code block')
+```
+
 - Just a random line item elsewhere
+
+Just another hello world paragraph with **bold** and _italic words_.
