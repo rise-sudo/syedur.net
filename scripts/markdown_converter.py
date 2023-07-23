@@ -12,6 +12,7 @@ def define_markdown_to_html():
             "###": "h3",
 
         },
+        "list": "-",
         "inline": {
             "**": "b",
             "_": "i"
@@ -50,8 +51,10 @@ def markdown_converter():
         blog_data = { 'name': blog_name, 'data': [] }
 
         with open(located_blog_file, 'r') as fn:
+            lines = fn.readlines()
+            list_items = []
             
-            for line in fn.readlines():
+            for index, line in enumerate(lines):
                 simple_markdown = False
                 html_line = line
                 html_tag = ''
@@ -72,7 +75,7 @@ def markdown_converter():
 
                 if line.startswith(markdown_to_html['image']):
                     alternate_text = line.split('](')[0][2:]
-                    image_source = line.split('](')[-1][:-1]
+                    image_source = line.strip().split('](')[-1][:-1]
                     html_line = f'<img alt="{alternate_text}" src="{image_source}">'
                     blog_data['data'].append({'type': 'img', 'content': html_line.strip()})
                     continue
@@ -91,6 +94,26 @@ def markdown_converter():
                             html_line = f'{html_line.replace(markdown, f"<{html_tag}>", 1)}'
                         else:
                             html_line = f'{html_line.replace(markdown, f"</{html_tag}>", 1)}'
+
+                if html_line.startswith(f"{markdown_to_html['list']} "):
+                    html_tag = 'li'
+                    html_line = f'<{html_tag}>{html_line[1:].strip()}</{html_tag}>'
+                    list_items.append(html_line)
+
+                    if index < len(lines)-1:
+                        next_line = lines[index+1]
+                        
+                        if next_line.startswith(f"{markdown_to_html['list']} "):
+                            pass
+                        else:
+                            blog_data['data'].append({'type': html_tag, 'content': list_items})
+                            list_items = []
+
+                    else:
+                        blog_data['data'].append({'type': html_tag, 'content': list_items})
+                        list_items = []
+
+                    continue
 
                 blog_data['data'].append({'type': 'p', 'content': f'<p>{html_line.strip()}</p>'})
 
